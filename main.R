@@ -53,10 +53,11 @@ rsemimport <- function(files, importer = NULL) {
     expcountsCol <- "gene_expected_count"
     TPMabundanceCol <- "geneTPM"
     FPKMabundanceCol <- "geneFPKM"
+    effectivelengthsCol <- "effective_length"
     unique(files.to.import)
     
     #Kill command if all params are not set. 
-    stopifnot(all(c(geneIdCol, TPMabundanceCol, FPKMabundanceCol, expcountsCol) %in% names(files.to.import)))
+    stopifnot(all(c(geneIdCol, TPMabundanceCol, FPKMabundanceCol, expcountsCol, effectivelengthsCol) %in% names(files.to.import)))
     
     #Iterate through each sample and prepare matrix columns. 
     if (sample == 1) {
@@ -67,20 +68,24 @@ rsemimport <- function(files, importer = NULL) {
       tpmabundance.matrix <- gene.matrix
       expcounts.matrix <- gene.matrix
       fpkmabundance.matrix <- gene.matrix
+      effective_length.matrix <- gene.matrix
      }
      
     #Combine all matrix columns together.  
     tpmabundance.matrix[,sample] <- files.to.import[[TPMabundanceCol]]
-     expcounts.matrix[,sample] <- files.to.import[[expcountsCol]]
-     fpkmabundance.matrix[,sample] <- files.to.import[[FPKMabundanceCol]]
+    expcounts.matrix[,sample] <- files.to.import[[expcountsCol]]
+    fpkmabundance.matrix[,sample] <- files.to.import[[FPKMabundanceCol]]
+    effective_length.matrix[,sample] <- files.to.import[[effectivelengthsCol]]
+    
     }
   
   #Remove duplicate rows from the matrices (since gene-level counts were duplicated based on transcript ID). 
   tpmabundance.matrix <- tpmabundance.matrix[!duplicated(rownames(tpmabundance.matrix)),]
   fpkmabundance.matrix <- fpkmabundance.matrix[!duplicated(rownames(fpkmabundance.matrix)),]
   expcounts.matrix <- expcounts.matrix[!duplicated(rownames(expcounts.matrix)),]
+  effective_length.matrix <- effective_length.matrix[!duplicated(rownames(effective_length.matrix)),]
   
   #@return the list. 
    message("")
-   return(list(TPM = tpmabundance.matrix, FPKM = FPKMabundance.matrix, expcounts = expcounts.matrix, countsFromAbundance = "no"))
+   return(list(TPM = tpmabundance.matrix, FPKM = FPKMabundance.matrix, counts = expcounts.matrix, lengths = effective_length.matrix, countsFromAbundance = "no"))
 }
