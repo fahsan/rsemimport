@@ -11,15 +11,15 @@
 #' Differential analyses for RNA-seq: transcript-level estimates
 #' improve gene-level inferences. F1000Research.
 #' \url{http://dx.doi.org/10.12688/f1000research.7563.1}
-#@dependencies utils read.delim capture.output (R CRAN)
+#@dependencies utils read.delim (if readr not installed) capture.output (R CRAN)
 
 #Declare function and inputs
 rsemimport <- function(files, importer = NULL) {
   
   #Set read.delimiter function using importer. 
-  if(is.null(importer) {
+  if(is.null(importer)) {
     # If the readr utility is not installed, feed importer function read.delim to enter package data. 
-    if(!requireNamespace("readr", quietly = TRUE) {
+    if(!requireNamespace("readr", quietly = TRUE)) {
       message("reading in files with read.delim function (install 'readr' package to speed this process up)")
       importer <- read.delim
      }
@@ -27,7 +27,13 @@ rsemimport <- function(files, importer = NULL) {
        else {
        message("reading in files with read_tsv")
        readrStatus <- TRUE
-       importer <- function(x) readr::read_tsv(x, progress = FALSE, col_types=readr::cols())
+       importer <- function(x) readr::read_tsv(x, progress = FALSE, 
+                                               #Add column labels to each file for downstream extraction. 
+                                              col_names=c("Isoform", "Chromosome", "Strand", "txStart", "txEnd", "cdsStart", 
+                                                                               "cdsEnd", "exonCount", "exonStarts", "exonEnds", "Hugo", "alignID", "Canonical",
+                                                                               "length", "effective_length", "tx_expected_count", "txTPM", "txFPKM", "IsoPct",
+                                                                               "gene_expected_count", "geneTPM", "geneFPKM"), 
+                                              col_types=readr::cols())
      }
    }
   
@@ -42,11 +48,6 @@ rsemimport <- function(files, importer = NULL) {
       files.to.import <- as.data.frame(importer(files[sample]))
     }, type = "message")
     
-    #Add titles to all data in files to import
-    colnames(files.to.import) <- c("Isoform", "Chromosome", "Strand", "txStart", "txEnd", "cdsStart", 
-                                   "cdsEnd", "exonCount", "exonStarts", "exonEnds", "Hugo", "alignID", "Canonical",
-                                   "length", "effective_length", "tx_expected_count", "txTPM", "txFPKM", "IsoPct",
-                                   "gene_expected_count", "geneTPM", "geneFPKM")
     #Extract gene exp counts, TPM, and FPKM abundance values. 
     geneIdCol <- "Hugo"
     expcountsCol <- "gene_expected_count"
@@ -73,8 +74,13 @@ rsemimport <- function(files, importer = NULL) {
      expcounts.matrix[,sample] <- files.to.import[[expcountsCol]]
      fpkmabundance.matrix[,sample] <- files.to.import[[FPKMabundanceCol]]
     }
-   
+  
+  #Remove duplicate rows from the matrices (since gene-level counts were duplicated based on transcript ID). 
+  tpmabundance.matrix <- tpmabundance.matrix[!duplicated(rownames(tpmabundance.matrix)),]
+  fpkmabundance.matrix <- fpkmabundance.matrix[!duplicated(rownames(fpkmabundance.matrix)),]
+  expcounts.matrix <- expcounts.matrix[!duplicated(rownames(expcounts.matrix)),]
+  
   #@return the list. 
    message("")
-   return(list(TPM = tpmabundance.matrix, FPKM = FPKMabundance.matrix, expcounts = expcounts.matrix, countsFromAbundance = "no")
+   return(list(TPM = tpmabundance.matrix, FPKM = FPKMabundance.matrix, expcounts = expcounts.matrix, countsFromAbundance = "no"))
 }
