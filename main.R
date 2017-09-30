@@ -11,10 +11,25 @@
 #' Differential analyses for RNA-seq: transcript-level estimates
 #' improve gene-level inferences. F1000Research.
 #' \url{http://dx.doi.org/10.12688/f1000research.7563.1}
-
+#@dependencies utils read.delim capture.output (R CRAN)
 
 #Declare function and inputs
 rsemimport <- function(files, importer = NULL) {
+  
+  #Set read.delimiter function using importer. 
+  if(is.null(importer) {
+    # If the readr utility is not installed, feed importer function read.delim to enter package data. 
+    if(!requireNamespace("readr", quietly = TRUE) {
+      message("reading in files with read.delim function (install 'readr' package to speed this process up)")
+      importer <- read.delim
+     }
+     #If the readr utility is installed, using readr function read_tsv to import the column data from each tab file. 
+       else {
+       message("reading in files with read_tsv")
+       readrStatus <- TRUE
+       importer <- function(x) readr::read_tsv(x, progress = FALSE, col_types=readr::cols())
+     }
+   }
   
   #For loop through index of samples in the files supplied. 
   for (sample in seq_along(files)) {
