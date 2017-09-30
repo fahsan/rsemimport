@@ -87,6 +87,6 @@ rsemimport <- function(files, importer = NULL) {
   
   #@return the list. 
    message("")
-   return(list(TPM = tpmabundance.matrix, FPKM = FPKMabundance.matrix, counts = expcounts.matrix, lengths = effective_length.matrix, countsFromAbundance = "no"))
+   return(list(TPM = tpmabundance.matrix, FPKM = fpkmabundance.matrix, counts = expcounts.matrix, lengths = effective_length.matrix, countsFromAbundance = "no"))
 }
 #done
