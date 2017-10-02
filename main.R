@@ -85,6 +85,9 @@ rsemimport <- function(files, importer = NULL) {
   expcounts.matrix <- expcounts.matrix[!duplicated(rownames(expcounts.matrix)),]
   effective_length.matrix <- effective_length.matrix[!duplicated(rownames(effective_length.matrix)),]
   
+  #Convert all matrix counts with 0 to 1 to prevent DESeq2 error. 
+  effective_length.matrix[effective_length.matrix == 0] <- 1
+  
   #@return the list. 
    message("")
    return(list(TPM = tpmabundance.matrix, FPKM = fpkmabundance.matrix, counts = expcounts.matrix, lengths = effective_length.matrix, countsFromAbundance = "no"))
