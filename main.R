@@ -54,6 +54,8 @@ rsemimport <- function(files, importer = NULL) {
     TPMabundanceCol <- "geneTPM"
     FPKMabundanceCol <- "geneFPKM"
     effectivelengthsCol <- "effective_length"
+    
+    #Remove duplicates. 
     unique(files.to.import)
     
     #Kill command if all params are not set. 
